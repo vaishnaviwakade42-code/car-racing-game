@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bike Racing Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+        background: #0b0b0b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    #gameContainer {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        height: 100vh;
+        background: #111;
+        overflow: hidden;
+    }
+
+    canvas {
+        display: block;
+    }
+
+    .hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        z-index: 10;
+        font-size: 14px;
+    }
+
+    .hud span {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .controls {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        display: flex;
+        height: 80px;
+    }
+
+    .control {
+        flex: 1;
+        background: rgba(255,255,255,0.05);
+    }
+
+    .gameOver {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: #fff;
+        display: none;
+        z-index: 20;
+    }
+
+    .gameOver h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    .gameOver button {
+        padding: 10px 20px;
+        background: #ff2e2e;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="gameContainer">
+    <canvas id="game"></canvas>
+
+    <div class="hud">
+        <span id="score">Score: 0</span>
+        <span id="speed">Speed: 60 km/h</span>
+    </div>
+
+    <div class="controls">
+        <div class="control" id="left"></div>
+        <div class="control" id="right"></div>
+    </div>
+
+    <div class="gameOver" id="gameOver">
+        <h1>Game Over</h1>
+        <p id="finalScore"></p>
+        <br>
+        <button onclick="restart()">Restart</button>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 420;
+canvas.height = window.innerHeight;
+
+let roadWidth = 240;
+let roadX = canvas.width / 2 - roadWidth / 2;
+
+let bike = {
+    x: canvas.width / 2,
+    y: canvas.height - 140,
+    width: 30,
+    height: 60,
+    speed: 5
+};
+
+let obstacles = [];
+let speed = 6;
+let score = 0;
+let gameRunning = true;
+
+// Resize
+window.addEventListener("resize", () => {
+    canvas.height = window.innerHeight;
+});
+
+// Controls
+let moveLeft = false;
+let moveRight = false;
+
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") moveLeft = true;
+    if (e.key === "ArrowRight") moveRight = true;
+});
+
+document.addEventListener("keyup", e => {
+    if (e.key === "ArrowLeft") moveLeft = false;
+    if (e.key === "ArrowRight") moveRight = false;
+});
+
+document.getElementById("left").ontouchstart = () => moveLeft = true;
+document.getElementById("left").ontouchend = () => moveLeft = false;
+document.getElementById("right").ontouchstart = () => moveRight = true;
+document.getElementById("right").ontouchend = () => moveRight = false;
+
+// Create obstacles
+function createObstacle() {
+    let x = roadX + Math.random() * (roadWidth - 40);
+    obstacles.push({
+        x: x,
+        y: -80,
+        width: 40,
+        height: 80
+    });
+}
+
+// Draw road
+let roadOffset = 0;
+function drawRoad() {
+    ctx.fillStyle = "#444";
+    ctx.fillRect(roadX, 0, roadWidth, canvas.height);
+
+    ctx.strokeStyle = "#fff";
+    ctx.setLineDash([20, 20]);
+    ctx.lineWidth = 3;
+
+    roadOffset += speed;
+    for (let i = -100; i < canvas.height; i += 60) {
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, i + roadOffset % 60);
+        ctx.lineTo(canvas.width / 2, i + 30 + roadOffset % 60);
+        ctx.stroke();
+    }
+
+    ctx.setLineDash([]);
+}
+
+// Draw bike
+function drawBike() {
+    ctx.fillStyle = "#ff2e2e";
+    ctx.fillRect(bike.x - bike.width / 2, bike.y, bike.width, bike.height);
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(bike.x - 12, bike.y + 45, 10, 10);
+    ctx.fillRect(bike.x + 2, bike.y + 45, 10, 10);
+}
+
+// Draw obstacles
+function drawObstacles() {
+    ctx.fillStyle = "#1e90ff";
+    obstacles.forEach(o => {
+        ctx.fillRect(o.x, o.y, o.width, o.height);
+    });
+}
+
+// Update
+function update() {
+    if (!gameRunning) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawRoad();
+
+    if (moveLeft && bike.x > roadX + bike.width) bike.x -= bike.speed * 1.5;
+    if (moveRight && bike.x < roadX + roadWidth - bike.width) bike.x += bike.speed * 1.5;
+
+    drawBike();
+
+    obstacles.forEach(o => o.y += speed);
+    drawObstacles();
+
+    obstacles = obstacles.filter(o => o.y < canvas.height + 100);
+
+    obstacles.forEach(o => {
+        if (
+            bike.x - bike.width / 2 < o.x + o.width &&
+            bike.x + bike.width / 2 > o.x &&
+            bike.y < o.y + o.height &&
+            bike.y + bike.height > o.y
+        ) {
+            gameOver();
+        }
+    });
+
+    score++;
+    speed += 0.0005;
+
+    document.getElementById("score").innerText = "Score: " + score;
+    document.getElementById("speed").innerText = "Speed: " + Math.floor(speed * 10) + " km/h";
+
+    requestAnimationFrame(update);
+}
+
+// Game over
+function gameOver() {
+    gameRunning = false;
+    document.getElementById("gameOver").style.display = "flex";
+    document.getElementById("finalScore").innerText = "Score: " + score;
+}
+
+// Restart
+function restart() {
+    obstacles = [];
+    speed = 6;
+    score = 0;
+    bike.x = canvas.width / 2;
+    gameRunning = true;
+    document.getElementById("gameOver").style.display = "none";
+    update();
+}
+
+// Spawn obstacles
+setInterval(() => {
+    if (gameRunning) createObstacle();
+}, 1200);
+
+update();
+</script>
+
+</body>
+</html>
+
