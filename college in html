@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2D Virtual College Campus</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #dff3ff, #a7d8ff);
+    overflow-x: hidden;
+}
+
+/* HEADER */
+.header {
+    background: #003566;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 28px;
+    letter-spacing: 1px;
+}
+
+/* CAMPUS AREA */
+.campus {
+    position: relative;
+    width: 100%;
+    height: 85vh;
+    background: linear-gradient(#87ceeb 60%, #4caf50 40%);
+}
+
+/* ROAD */
+.road {
+    position: absolute;
+    width: 100%;
+    height: 70px;
+    background: #444;
+    bottom: 180px;
+}
+
+/* BUILDINGS */
+.building {
+    position: absolute;
+    width: 160px;
+    height: 130px;
+    background: #fff;
+    border-radius: 10px;
+    border: 4px solid #003566;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.building:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+}
+
+.building h5 {
+    margin-top: 45px;
+    font-weight: bold;
+}
+
+/* INDIVIDUAL BUILDINGS */
+.academic { top: 120px; left: 8%; background:#ffe066; }
+.library  { top: 120px; left: 30%; background:#ffd6e0; }
+.lab      { top: 120px; left: 52%; background:#d3f9d8; }
+.sports   { top: 120px; left: 74%; background:#cdb4db; }
+
+/* TREES */
+.tree {
+    position: absolute;
+    width: 40px;
+    height: 60px;
+    background: #2d6a4f;
+    border-radius: 50% 50% 0 0;
+    bottom: 160px;
+}
+
+/* FOOTER */
+.footer {
+    background: #003566;
+    color: white;
+    text-align: center;
+    padding: 8px;
+}
+
+/* MODAL TEXT */
+.modal-body {
+    font-size: 16px;
+    line-height: 1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🎓 Virtual 2D College Campus</div>
+
+<div class="campus">
+
+    <div class="road"></div>
+
+    <!-- BUILDINGS -->
+    <div class="building academic" data-title="Academic Block" data-info="This block contains classrooms, lecture halls, and faculty offices. Students attend lectures and exams here.">
+        <h5>Academic Block</h5>
+    </div>
+
+    <div class="building library" data-title="Library" data-info="The library has thousands of books, journals, digital resources, and silent study areas for students.">
+        <h5>Library</h5>
+    </div>
+
+    <div class="building lab" data-title="Laboratory" data-info="Labs are equipped with modern instruments for practical learning, research, and experiments.">
+        <h5>Laboratory</h5>
+    </div>
+
+    <div class="building sports" data-title="Sports Complex" data-info="Sports complex includes indoor & outdoor games, gym, and fitness facilities.">
+        <h5>Sports</h5>
+    </div>
+
+    <!-- TREES -->
+    <div class="tree" style="left:15%"></div>
+    <div class="tree" style="left:35%"></div>
+    <div class="tree" style="left:55%"></div>
+    <div class="tree" style="left:75%"></div>
+
+</div>
+
+<div class="footer">© 2026 Virtual College | Designed for Best User Experience</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="buildingModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    $(".building").click(function(){
+        let title = $(this).data("title");
+        let info = $(this).data("info");
+
+        $(".modal-title").text(title);
+        $(".modal-body").text(info);
+
+        new bootstrap.Modal(document.getElementById('buildingModal')).show();
+    });
+});
+</script>
+
+</body>
+</html>
+
